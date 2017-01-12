@@ -1,5 +1,5 @@
-(ns esc.test.core
-  (:use [esc.core])
+(ns app.test.core
+  (:use [app.core])
   (:use [clojure.test]))
 
 (deftest replace-me ;; FIXME: write
