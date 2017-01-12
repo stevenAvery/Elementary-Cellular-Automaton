@@ -6,7 +6,7 @@
 ;; usage rule iterations imageName cellSize
 (def ^:const defaultRule       150)
 (def ^:const defaultIterations 64)
-(def ^:const defaultImageName  "output.png")
+(def ^:const defaultImageName  "res/output.png")
 (def ^:const defaultCellSize   4)
 
 (defn -main [& args]
@@ -38,9 +38,14 @@
       (Integer. (nth args 3))
       defaultCellSize))
 
+  ;; calculate the elementary cellular automaton
+
+  ;; calculate the final gridsize (each step the grid will expand by one on each end)
   (def gridSize {:width (dec (* iterations 2)) :height iterations})
+  ;; generate the first row of cells
   (def cells (esc/zeroBookendLength '(1) (gridSize :width)))
+  ;; get the final grid of cells
   (def gridCells (esc/run cells (esc/decToRule rule) iterations))
 
-)
-  ;;(println "From main:" args))
+  ;; save the result of the elementary cellular automaton as a PNG
+  (png/outputPNG gridCells imageName gridSize cellSize))

@@ -1,6 +1,5 @@
 (ns app.esc)
 
-;; Elementary Cellular Automata
 (defn zeroBookend
   "bookend list with a zero"
   [toBookend]
@@ -59,19 +58,15 @@
   (map #(nth inRule %)
     (map binToDec (triples (zeroBookend inCells)))))
 
-;; TODO this computes one extra step
 (defn run
   "Steps the cells the given number of times"
   ;; if the user doesn't give the count of the current step assume zero
   ([inCells inRule stepCount]
     (run inCells inRule stepCount '()))
   ([inCells inRule stepCount gridCells]
-    ;;(print stepCount)
     (printCells inCells)
-    ;;(Thread/sleep 0)
-
     ;; if we have reached the end of the grid return
-    (if (<= stepCount 0)
-      gridCells
+    (if (<= stepCount 1)
+      (concat gridCells inCells)
       ;; otherwise step, and recursively keep running
       (recur (step inCells inRule) inRule (dec stepCount) (concat gridCells inCells)))))
