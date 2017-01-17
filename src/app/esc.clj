@@ -35,13 +35,14 @@
   (reverse (zeroPad (decToBin decNum) 8)))
 
 (defn printCells
-  "Output automata cells"
-  [toPrint]
-  (doseq [i toPrint]
-    (if (= i 1)
-      (print "#")   ;; (print "\033[42;1m#\033[0m")
-      (print " "))) ;; (print "\033[40;1m \033[0m")))
-  (println ""))
+  "Draws the cells for the output image"
+  [gridCells gridSize]
+  (doseq [cell (range (count gridCells))]
+    (when (== (mod cell (gridSize :width)) 0)
+      (println ""))
+    (if (== (nth gridCells cell) 1)
+      (print "#")
+      (print " "))))
 
 (defn triples
   "return list of all triples in input ie: (1 2 3 4) returns ((1 2 3) (2 3 4))"
@@ -64,7 +65,6 @@
   ([inCells inRule stepCount]
     (run inCells inRule stepCount '()))
   ([inCells inRule stepCount gridCells]
-    (printCells inCells)
     ;; if we have reached the end of the grid return
     (if (<= stepCount 1)
       (concat gridCells inCells)
