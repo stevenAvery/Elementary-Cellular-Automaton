@@ -1,7 +1,7 @@
 (ns app.core
   (:require [clojure.tools.cli :refer [parse-opts]]
             [clojure.string :as string]
-            [app.esc :as esc]
+            [app.eca :as eca]
             [app.png :as png])
   (:gen-class))
 
@@ -13,7 +13,7 @@
   [["-i" "--iterations ITERATIONS" "Number of iterations to compute"
      :default defaultIterations
      :parse-fn #(Integer/parseInt %)
-     :validate [#(> 0 %) "Must be a number greater then 0"]]
+     :validate [#(> % 0) "Must be a number greater then 0"]]
    ["-o" "--imageName IMAGE_NAME" "Name of the output image"
      :default defaultImageName]
    ["-p" "--png" "Boolean to output to png"]
@@ -75,73 +75,16 @@
       ;; calculate the final gridsize (each step the grid will expand by one on each end)
       (def gridSize {:width (dec (* iterations 2)) :height iterations})
       ;; generate the first row of cells
-      (def cells (esc/zeroBookendLength '(1) (gridSize :width)))
+      (def cells (eca/zeroBookendLength '(1) (gridSize :width)))
       ;; get the final grid of cells
-      (def gridCells (esc/run cells (esc/decToRule rule) iterations))
+      (def gridCells (eca/run cells (eca/decToRule rule) iterations))
 
       ;; output the result of the elementary cellular automaton to the terminal
       (when terminal?
-        (esc/printCells gridCells gridSize))
+        (eca/printCells gridCells gridSize))
 
       ;; save the result of the elementary cellular automaton as a PNG
       (when png?
         (png/outputPNG gridCells imageName gridSize cellSize))
 
       (print "")))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  (comment
-    (when (and (== (count args) 1) (= (first args) "--help"))
-      ((println "Usage: [rule] [iterations] [imageName] [cellSize]")
-       (println "\trule         rule to be applied at each step (0 >= rule >= 255)")
-       (println "\titerations   number of iterations to be computed (iteration >= 0)")
-       (println "\timageName    name of the output file")
-       (println "\tcellSize     size of the cells in the output file (cellSize >= 2) ")
-       (System/exit 0)))
-       ;; draw gridlines (bool)
-       ;; toImage
-       ;; toConsole
-       ;; -v
-
-
-    ;; if arg1 is a valid make it the rule, otherwise use default
-    (def rule
-      (if (and (>= (count args) 1)
-               (>= (Integer. (first args)) 0)    ;; min rule
-               (<= (Integer. (first args)) 255)) ;; max rule
-          (Integer. (first args))
-          defaultRule))
-
-    ;; if arg2 is a valid make it the iterations, otherwise use default
-    (def iterations
-      (if (and (>= (count args) 2)
-               (>= (Integer. (second args)) 0)) ;; min iterations
-        (Integer. (second args))
-        defaultIterations))
-
-    ;; if arg3 is a valid make it the imageName, otherwise use default
-    (def imageName
-      (if (> (count args) 2)
-        (nth args 2)
-        defaultImageName))
-
-    ;; if arg3 is a valid make it the cellSize, otherwise use default
-    (def cellSize
-      (if (and (> (count args) 3)
-               (>= (Integer. (nth args 3)) 2)) ;; min cellSize
-        (Integer. (nth args 3))
-        defaultCellSize))
-)
