@@ -22,20 +22,8 @@
 
 (defn drawCells
   "draws the cells for the output image"
-  [g gridCells gridSize imageSize cellSize]
-  (doseq [cell (range (count gridCells))
-          :when (== (nth gridCells cell) 1)
-          :let [x (mod cell (gridSize :width)) y (quot cell (gridSize :width))]]
-    ;;(println cell)
-    (progress/status (/ cell (count gridCells)) "Outputting eca results to png")
-    (.fillRect g
-      (inc (* x cellSize)) (inc (* y cellSize))
-      (dec cellSize) (dec cellSize))))
-
-(defn drawCells2
-  "draws the cells for the output image"
   ([g gridCells gridSize imageSize cellSize verbose?]
-    (drawCells2 g gridCells gridSize imageSize cellSize verbose? 0 0))
+    (drawCells g gridCells gridSize imageSize cellSize verbose? 0 0))
   ([g gridCells gridSize imageSize cellSize verbose? cell prevy]
     ;(when (> (quot cell (gridSize :width)) y)
     ;  (progress/status (/ cell (count gridCells)) "Outputting eca results to png"))
@@ -45,7 +33,7 @@
         ;; output progress when we start a new line
         (when (and verbose? (> y prevy))
           (progress/status (/ y (dec (gridSize :height)))
-            (str "Drawing output image cells [line " y " of " (dec (gridSize :height)) "]")))
+            (str "image cells [line " y " of " (dec (gridSize :height)) "]")))
 
         ;; output the cell when gridcell is true
         (when (== (nth gridCells cell) 1)
@@ -68,19 +56,19 @@
 
     ;; draw background
     (when verbose?
-      (progress/status 0.01 "Drawing output image background"))
+      (progress/status 0.01 "image background"))
     (.setColor g backgroundColour)
     (.fillRect g 0 0 (imageSize :width) (imageSize :height))
 
     ;; draw grid
     (when verbose?
-      (progress/status 0.05 "Drawing output image grid"))
+      (progress/status 0.01 "image grid"))
     (.setColor g gridColour)
     (drawGrid g imageSize cellSize)
 
     ;; draw cells
     (.setColor g cellColour)
-    (drawCells2 g gridCells gridSize imageSize cellSize verbose?)
+    (drawCells g gridCells gridSize imageSize cellSize verbose?)
 
     ;; save the image
     (ImageIO/write bi imageType (File. imageName))))

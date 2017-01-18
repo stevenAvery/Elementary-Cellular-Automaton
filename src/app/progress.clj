@@ -3,7 +3,7 @@
 (defn status
   "display the progress status"
   ([percent] (status percent ""))
-  ([percent msg] (status percent msg 50))
+  ([percent msg] (status percent msg 40))
   ([percent msg width]
     (print (str
       "\r"
@@ -13,5 +13,6 @@
         (seq
           (for [i (range width)]
             (if (<= i (* (min percent 1.0) (/ width 1.0))) "=" " "))))
-      "] " msg))
+      "] "
+      (format (str "%-" (- 80 width 8) "s") msg)))
     (flush)))

@@ -21,8 +21,7 @@
      :default defaultCellSize
      :parse-fn #(Integer/parseInt %)
      :validate [#(> % 1) "Must be a number greater then 1"]]
-   ["-p" "--png" "Boolean to output to png"]
-   ["-t" "--terminal" "Boolean to output to terminal"]
+   ["-p" "--png" "Boolean to output to png (otherwise will default to console)"]
    ["-v" "--verbose" "Boolean to output additional progress information"]
    ["-h" "--help"]])
 
@@ -31,13 +30,13 @@
   [options-summary]
   (->> ["Computes elementary cellular automaton, and outputs to console or png."
         ""
-        "Usage: lein run rule [options]"
+        "Usage: program RULE [options]"
         ""
         "Options:"
         options-summary
         ""
         "Arguments:"
-        "    rule    Rule for elementary cellular automaton"
+        "    RULE    Rule for elementary cellular automaton"
         "            Must be a number between 0 and 255"
         ""]
        (string/join \newline)))
@@ -78,7 +77,6 @@
       (def iterations (options :iterations))
       (def imageName  (options :imageName))
       (def png?       (options :png))
-      (def terminal?  (options :terminal))
       (def verbose?   (options :verbose))
       (def cellSize   (options :cellSize))
 
@@ -90,13 +88,12 @@
       ;; get the final grid of cells
       (def gridCells (eca/run cells (eca/decToRule rule) iterations verbose?))
 
-      ;; output the result of the elementary cellular automaton to the terminal
-      (when terminal?
-        (eca/printCells gridCells gridSize ))
-
-      ;; save the result of the elementary cellular automaton as a PNG
-      (when verbose? (println ""))
-      (when png?
-        (png/outputPNG gridCells imageName gridSize cellSize verbose?))
+      (if png?
+        ;; save the result of the elementary cellular automaton as a PNG
+        (do
+          (when verbose? (println ""))
+          (png/outputPNG gridCells imageName gridSize cellSize verbose?))
+        ;; output the result of the elementary cellular automaton to the terminal
+        (eca/printCells gridCells gridSize))
 
       (print "")))

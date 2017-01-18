@@ -69,7 +69,7 @@
     ;; output progress
     (when verbose?
       (progress/status (/ (inc (- maxStepCount stepCount)) maxStepCount)
-        "Computing elementary cellular automaton"))
+        "cellular automaton"))
 
     ;; if we have reached the end of the grid return
     (if (<= stepCount 1)
