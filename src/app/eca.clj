@@ -1,4 +1,5 @@
-(ns app.eca)
+(ns app.eca
+  (:require [app.progress :as progress]))
 
 (defn zeroBookend
   "bookend list with a zero"
@@ -13,12 +14,12 @@
     (recur (zeroBookend inList) inLength)))
 
 (defn decToBin
-  "Convert a single decimal number to a binary list"
+  "convert a single decimal number to a binary list"
   [decNum]
   (map #(Character/getNumericValue %) (Integer/toBinaryString decNum)))
 
 (defn binToDec
-  "Convert a binary list to a single decimal number"
+  "convert a binary list to a single decimal number"
   [binList]
   (Integer/parseInt (apply str binList) 2))
 
@@ -35,7 +36,7 @@
   (reverse (zeroPad (decToBin decNum) 8)))
 
 (defn printCells
-  "Draws the cells for the output image"
+  "draws the cells for the output image"
   [gridCells gridSize]
   (doseq [cell (range (count gridCells))]
     (when (== (mod cell (gridSize :width)) 0)
@@ -60,13 +61,24 @@
     (map binToDec (triples (zeroBookend inCells)))))
 
 (defn run
-  "Steps the cells the given number of times"
+  "steps the cells the given number of times"
   ;; if the user doesn't give the count of the current step assume zero
-  ([inCells inRule stepCount]
-    (run inCells inRule stepCount '()))
-  ([inCells inRule stepCount gridCells]
+  ([inCells inRule stepCount verbose?]
+    (run inCells inRule stepCount stepCount verbose? '()))
+  ([inCells inRule stepCount maxStepCount verbose? gridCells]
+    ;; output progress
+    (when verbose?
+      (progress/status (/ (inc (- maxStepCount stepCount)) maxStepCount)
+        "Computing elementary cellular automaton"))
+
     ;; if we have reached the end of the grid return
     (if (<= stepCount 1)
       (concat gridCells inCells)
       ;; otherwise step, and recursively keep running
-      (recur (step inCells inRule) inRule (dec stepCount) (concat gridCells inCells)))))
+      (recur
+        (step inCells inRule)
+        inRule
+        (dec stepCount)
+        maxStepCount
+        verbose?
+        (concat gridCells inCells)))))

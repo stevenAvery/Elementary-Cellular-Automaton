@@ -5,6 +5,7 @@
             [app.png :as png])
   (:gen-class))
 
+;; default constants
 (def ^:const defaultIterations 32)
 (def ^:const defaultImageName  "res/output.png")
 (def ^:const defaultCellSize   4)
@@ -16,16 +17,19 @@
      :validate [#(> % 0) "Must be a number greater then 0"]]
    ["-o" "--imageName IMAGE_NAME" "Name of the output image"
      :default defaultImageName]
-   ["-p" "--png" "Boolean to output to png"]
-   ["-t" "--terminal" "Boolean to output to terminal"]
    ["-c" "--cellSize CELL_SIZE" "The size of the cells in the output image"
      :default defaultCellSize
      :parse-fn #(Integer/parseInt %)
-     :validate [#(> 1 %) "Must be a number greater then 1"]]
+     :validate [#(> % 1) "Must be a number greater then 1"]]
+   ["-p" "--png" "Boolean to output to png"]
+   ["-t" "--terminal" "Boolean to output to terminal"]
+   ["-v" "--verbose" "Boolean to output additional progress information"]
    ["-h" "--help"]])
 
-(defn usage [options-summary]
-  (->> ["This is my program. There are many like it, but this one is mine."
+(defn usage
+  "the intended command-line usage for the program"
+  [options-summary]
+  (->> ["Computes elementary cellular automaton, and outputs to console or png."
         ""
         "Usage: lein run rule [options]"
         ""
@@ -38,15 +42,21 @@
         ""]
        (string/join \newline)))
 
-(defn error-msg [errors]
+(defn error-msg
+  "output an error message to the user"
+  [errors]
   (str "The following errors occurred while parsing your command:\n\n"
        (string/join \newline errors)))
 
-(defn exit [status msg]
+(defn exit
+  "exit the program if there is an error parsing input args"
+  [status msg]
   (println msg)
   (System/exit status))
 
-(defn toInt [s]
+(defn toInt
+  "Convert a string to int"
+  [s]
   (if-let [d (re-find #"-?\d+" s)] (Integer/parseInt d)
   -1))
 
@@ -66,10 +76,11 @@
 
       ;; get all other options from tools.cli
       (def iterations (options :iterations))
-      (def imageName (options :imageName))
-      (def png? (options :png))
-      (def terminal? (options :terminal))
-      (def cellSize (options :cellSize))
+      (def imageName  (options :imageName))
+      (def png?       (options :png))
+      (def terminal?  (options :terminal))
+      (def verbose?   (options :verbose))
+      (def cellSize   (options :cellSize))
 
       ;; calculate the elementary cellular automaton
       ;; calculate the final gridsize (each step the grid will expand by one on each end)
@@ -77,14 +88,15 @@
       ;; generate the first row of cells
       (def cells (eca/zeroBookendLength '(1) (gridSize :width)))
       ;; get the final grid of cells
-      (def gridCells (eca/run cells (eca/decToRule rule) iterations))
+      (def gridCells (eca/run cells (eca/decToRule rule) iterations verbose?))
 
       ;; output the result of the elementary cellular automaton to the terminal
       (when terminal?
-        (eca/printCells gridCells gridSize))
+        (eca/printCells gridCells gridSize ))
 
       ;; save the result of the elementary cellular automaton as a PNG
+      (when verbose? (println ""))
       (when png?
-        (png/outputPNG gridCells imageName gridSize cellSize))
+        (png/outputPNG gridCells imageName gridSize cellSize verbose?))
 
       (print "")))
